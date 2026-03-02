@@ -12,6 +12,10 @@ ENV/
 env.bak/
 venv.bak/
 
-# Audio / Output files (if you want to ignore them)
-output.wav
-test_audio.wav
+# Audio / Output files
+*.wav
+*.mp3
+*.ogg
+
+# IDEs
+.vscode/

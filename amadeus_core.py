@@ -1,17 +1,26 @@
 import os
 import sys
-from dotenv import load_dotenv
+from dotenv import load_dotenv, find_dotenv
 from google import genai
 from google.genai import types
 
-load_dotenv() #環境変数呼び出し
+# 【重要】一つ上の階層にある.envファイルを探し出し、
+# IDE(Antigravity)が勝手に設定している環境変数を「上書き(override=True)」する！
+load_dotenv(find_dotenv(), override=True) #環境変数呼び出し
 API_KEY = os.getenv("GEMINI_API_KEY")  #APIキー設定
+print("GEMINI_API_KEY取得完了")
 
 if not API_KEY:  #APIなければエラーで終了
     print("APIKEY is not found...")
     sys.exit(1)
 
+# 【重要】実行環境(IDE)自体が「GOOGLE_API_KEY」を持っている場合、
+# SDKが勝手にそっちを優先してしまう仕様の回避策
+if "GOOGLE_API_KEY" in os.environ:
+    os.environ.pop("GOOGLE_API_KEY", None)
+
 class AmadeusBrain:  #実体（インスタンス）が生まれた瞬間に、自動的に1回だけ呼ばれるセットアップ関数。
+
     def __init__(self):
         self.client = genai.Client(api_key=API_KEY) #自分の持ち物としてGeminiの実体作成
     
@@ -38,6 +47,7 @@ class AmadeusBrain:  #実体（インスタンス）が生まれた瞬間に、�
 
     #チャット機能実装 (同期処理returnだと、リアルタイム性がないので、非同期yieldを採用しTTFTを低減）
     def ask_stream(self, user_input):
+        print("\n[System Info] 📡 Gemini APIへリクエストを1回送信しました（これよりストリーム受信）...")
         response = self.chat.send_message_stream(user_input) #応答性のため、全部待つんじゃなくてstreamさせる
         for chunk in response:
             yield chunk.text  #chunkからtext(アトリビュート)を取り出して呼び出しもとに返す
