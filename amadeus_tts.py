@@ -29,7 +29,7 @@ class AmadeusMouth:
 
     def speak(self, text):
         """テキストをVOICEVOXに投げて、生成された音声を再生するメソッド"""
-        print(f"\n[Mouth] {text} （←これを音声化します）")
+        #print(f"\n[Mouth] {text} （←これを音声化します）")
 
         # ----------------------------------------------------
         # 1. 音声合成用の「設計図（Query）」をVOICEVOXに作ってもらう
@@ -75,7 +75,7 @@ class AmadeusMouth:
         # ----------------------------------------------------
         # 4. 再生する（Windows標準の winsound を使用）
         # ----------------------------------------------------
-        print("音声の再生を開始します……")
+        #print("音声の再生を開始します……")
         import subprocess
         # PowerShellの再生コマンドを直接叩く
         command = f'powershell -c (New-Object Media.SoundPlayer "{temp_filename}").PlaySync()'
