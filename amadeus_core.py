@@ -42,7 +42,7 @@ class AmadeusBrain:  #実体（インスタンス）が生まれた瞬間に、�
         ]
         
         # RAG用のChromaDBを初期化
-        db_path = os.path.join(os.path.dirname(__file__), "chroma_db")
+        db_path = os.path.join(os.path.dirname(__file__), "memory_db")
         chroma_client = chromadb.PersistentClient(path=db_path)
         self.memory_collection = chroma_client.get_or_create_collection(name="kurisu_memories")
 
