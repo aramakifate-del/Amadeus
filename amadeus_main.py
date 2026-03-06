@@ -6,7 +6,6 @@ import sys
 import keyboard
 import time
 
-
 def main():
     print("システム起動中...各モジュールを初期化します...")
 
