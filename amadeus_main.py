@@ -14,27 +14,16 @@ def main():
     ear = AmadeusEar()
     mouth = AmadeusMouth()
    
-    print("\n初期化完了。Amadeus System 起動。")
+    print("\n初期化完了。Amadeus System 起動。(自律型VADモード)")
     print("終了するには Ctrl+C を押してください。")
-    print("スペースキーを押すと、10秒録音開始、またはctrlキーを押すと、テキスト入力開始です。")
 
     #対話ループの処理を書く
     while True:
         try:
-            user_input = None #まず入力を受け取る（フラグ管理、変数初期化）
-            
-            #スペースキーで録音開始の処理
-            if keyboard.is_pressed("space"):
-                print("録音開始")
-                user_input = ear.VoiceTyper()
-                print(user_input)
-            
-            #ctrlならチャットモード
-            elif keyboard.is_pressed("ctrl"): #enterだとinput時に2回反応してしまうのでctrlに変更。だるすぎ！！
-                print("テキスト入力開始")
-                user_input = input("\n[あなた]") #ユーザーの入力
+            # VAD搭載の自律型Earに監視を完全に委譲する（ブロック処理）
+            user_input = ear.listen_autonomously()
 
-            # user_input変数が代入されてるなら....
+            # user_input変数が代入されてる（声かテキストが返ってきた）なら....
             if user_input:
                 #LLMの関数呼び出し、聞き取ったテキスト（user_text）を、脳（brain）に渡して考えさせる
                 print("\n[Amadeus]: ", end="")
