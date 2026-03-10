@@ -6,6 +6,9 @@ import sys
 import time
 import keyboard
 import numpy as np
+import logging
+
+logger = logging.getLogger("AmadeusEar")
 
 # VAD関連の設定
 FORMAT        = pyaudio.paInt16 # Silero VADはint16を要求
@@ -28,7 +31,7 @@ def look_for_audio_input():
 
 class AmadeusEar:
     def __init__(self):
-        print("[AmadeusEar] 初期化中... モデルをロードしています...")
+        logger.info("初期化中... モデルをロードしています...")
         # Whisperモデル定義
         self.model = WhisperModel(model_size_or_path="base", device="cpu", compute_type="int8")
         
@@ -51,18 +54,18 @@ class AmadeusEar:
         
         # PyAudioのインスタンス化 (常時監視用)
         self.audio = pyaudio.PyAudio()
-        print("[AmadeusEar] 初期化完了。")
+        logger.info("初期化完了。")
 
     def listen(self, audio_data):
         # audio_data: 1次元のnumpy.ndarray (float32) を想定
         segments, info = self.model.transcribe(audio_data, beam_size=5, language="ja")
         #beam size:AIが次の単語を予測する際の「探索の幅」。
-        print("Detected language '%s' with probability %f" % (info.language, info.language_probability))
+        logger.info("Detected language '%s' with probability %f" % (info.language, info.language_probability))
            
         # セグメント（断片）からテキストだけを抽出して、1つの文字列に結合する
         full_text = "".join([segment.text for segment in segments])
         # 結合した文字列を、関数の外（呼び出し元）に返す！
-        print(f"ユーザーの入力：{full_text}")
+        logger.info(f"ユーザーの入力：{full_text}")
         return full_text
 
     def listen_autonomously(self):
@@ -72,7 +75,7 @@ class AmadeusEar:
         Ctrlキーが押された場合は録音をブレイクしてテキスト手動入力を促す。
         """
         import torch
-        print("\n[AmadeusEar] 🎧 マイク監視中... (声をかけるか、Ctrlキーでテキスト入力)")
+        logger.info("🎧 マイク監視中... (声をかけるか、Ctrlキーでテキスト入力)")
         
         stream = self.audio.open(format=FORMAT, channels=CHANNELS, rate=SAMPLE_RATE, input=True, frames_per_buffer=FRAME_SIZE)
         self.vad_iterator.reset_states() # VADの内部状態をリセット
@@ -101,12 +104,12 @@ class AmadeusEar:
                 if speech_dict:
                     if 'start' in speech_dict:
                         is_recording = True
-                        print("🟢 録音開始...")
+                        logger.info("🟢 録音開始...")
                         frames = [] # 前回のカスが残らないように確実に初期化
                     elif 'end' in speech_dict:
                         if is_recording:
                             is_recording = False
-                            print("🔴 録音終了。推論中...")
+                            logger.info("🔴 録音終了。推論中...")
                             break # whileループを抜けて推論フェーズへ
                 
                 # 5. 録音フラグが立っている間、チャンクを保存し続ける

@@ -6,6 +6,9 @@ import threading
 import pyaudio
 import wave
 import io
+import logging
+
+logger = logging.getLogger("AmadeusMouth")
 
 class AmadeusMouth:
     def __init__(self, host="127.0.0.1", port=50021):
@@ -35,10 +38,10 @@ class AmadeusMouth:
         """VOICEVOXアプリが起動しているか確認する初期チェック"""
         try:
             res = requests.get(f"{self.base_url}/version", timeout=2)
-            print(f"VOICEVOX接続成功（Ver {res.text}）: エンジン起動確認ヨシ！")
+            logger.info(f"VOICEVOX接続成功（Ver {res.text}）: エンジン起動確認ヨシ！")
             return True
         except requests.exceptions.RequestException:
-            print(f"エラー: VOICEVOXアプリが見つかりません。起動してからやり直してください。({self.base_url})")
+            logger.error(f"VOICEVOXアプリが見つかりません。起動してからやり直してください。({self.base_url})")
             return False
 
     def speak(self, text):
@@ -70,7 +73,7 @@ class AmadeusMouth:
             try:
                 query_response = requests.post(f"{self.base_url}/audio_query", params=query_payload)
                 if query_response.status_code != 200:
-                    print("エラー: 設計図(audio_query)の作成に失敗したわ。")
+                    logger.error("設計図(audio_query)の作成に失敗したわ。")
                     self.audio_queue.task_done()
                     continue
 
@@ -85,12 +88,12 @@ class AmadeusMouth:
                 )
 
                 if audio_response.status_code != 200:
-                    print("エラー: 音声データの合成(synthesis)に失敗したわ。")
+                    logger.error("音声データの合成(synthesis)に失敗したわ。")
                     self.audio_queue.task_done()
                     continue
                     
             except requests.exceptions.RequestException as e:
-                print(f"[Mouth Error] VOICEVOXに接続できません。({e})")
+                logger.error(f"VOICEVOXに接続できません。({e})")
                 self.audio_queue.task_done()
                 continue
 
@@ -125,7 +128,7 @@ class AmadeusMouth:
                     # 次のチャンクが来た時にそのままこの土管に流し込むため、開けっ放し（Keep Connection）にする。
 
             except Exception as e:
-                print(f"[Mouth Error] PyAudioでのインメモリ再生中にエラーが発生しました: {e}")
+                logger.error(f"PyAudioでのインメモリ再生中にエラーが発生しました: {e}")
             finally:
                 # タスク完了をキューに通知
                 self.audio_queue.task_done()

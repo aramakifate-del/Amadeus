@@ -1,18 +1,21 @@
 import os
 import sys
+import logging
 from dotenv import load_dotenv, find_dotenv
 from groq import Groq
 import chromadb
+
+logger = logging.getLogger("AmadeusBrain")
 
 # 【重要】一つ上の階層にある.envファイルを探し出し、
 # IDE(Antigravity)が勝手に設定している環境変数を「上書き(override=True)」する！
 #Gemini > Groq へ変更。
 load_dotenv(find_dotenv(), override=True) #環境変数呼び出し
 API_KEY = os.getenv("GROQ_API_KEY")  #APIキー設定
-print("GROQ_API_KEY取得完了")
+logger.info("GROQ_API_KEY取得完了")
 
 if not API_KEY:  #APIなければエラーで終了
-    print("APIKEY is not found...")
+    logger.error("APIKEY is not found...")
     sys.exit(1)
 
 # 【重要】実行環境(IDE)自体が「GOOGLE_API_KEY」を持っている場合、
@@ -46,11 +49,11 @@ class AmadeusBrain:  #実体（インスタンス）が生まれた瞬間に、�
         chroma_client = chromadb.PersistentClient(path=db_path)
         self.memory_collection = chroma_client.get_or_create_collection(name="kurisu_memories")
 
-        print("チャットセット完了 (Groq/Llama3 + RAG Vector Database)")
+        logger.info("チャットセット完了 (Groq/Llama3 + RAG Vector Database)")
 
     #チャット機能実装 (同期処理returnだと、リアルタイム性がないので、非同期yieldを採用しTTFTを低減）
     def ask_stream(self, user_input):
-        print("\n[System Info] 📡 記憶領域(ChromaDB)から関連する記憶を検索中...")
+        logger.info("📡 記憶領域(ChromaDB)から関連する記憶を検索中...")
         
         # 1. RAG Retrieve: ユーザーの入力に近い記憶をTop-3取得
         results = self.memory_collection.query(
@@ -60,7 +63,7 @@ class AmadeusBrain:  #実体（インスタンス）が生まれた瞬間に、�
         
         retrieved_memories = results['documents'][0]
         memory_text = "\n".join([f"- {mem}" for mem in retrieved_memories])
-        print(f"[System Info] 🧠 引き出された記憶:\n{memory_text}")
+        logger.info(f"🧠 引き出された記憶:\n{memory_text}")
 
         # 2. RAG Augment: 検索した記憶をシステムプロンプトとして一時的に注入（Inject）
         rag_prompt = f"""
@@ -76,7 +79,7 @@ class AmadeusBrain:  #実体（インスタンス）が生まれた瞬間に、�
         tmp_messages.append({"role": "system", "content": rag_prompt})
         tmp_messages.append({"role": "user", "content": user_input})
 
-        print("\n[System Info] 📡 Groq APIへリクエストを送信しました（これよりストリーム受信）...")
+        logger.info("📡 Groq APIへリクエストを送信しました（これよりストリーム受信）...")
         
         # ユーザーの発言を（正規の）履歴に追加
         self.message_history.append({"role": "user", "content": user_input})

@@ -5,16 +5,25 @@ import os
 import sys
 import keyboard
 import time
+import logging
+
+# ===== ロギング設定 =====
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s [%(levelname)s] %(name)s: %(message)s',
+    datefmt='%H:%M:%S'
+)
+logger = logging.getLogger("AmadeusMain")
 
 def main():
-    print("システム起動中...各モジュールを初期化します...")
+    logger.info("システム起動中...各モジュールを初期化します...")
 
     #ここで各器官のインスタンスを作成
     brain = AmadeusBrain()
     ear = AmadeusEar()
     mouth = AmadeusMouth()
    
-    print("\n初期化完了。Amadeus System 起動。(自律型VADモード)")
+    logger.info("初期化完了。Amadeus System 起動。(自律型VADモード)")
     print("終了するには Ctrl+C を押してください。")
 
     #対話ループの処理を書く
@@ -53,8 +62,7 @@ def main():
                         
                 except Exception as e:
                     # GeminiのAPI制限(429)等のエラーをここでキャッチしてシステムダウンを防ぐ
-                    error_msg = f"\n[System Error] 脳の処理中にエラーが発生しました（API制限の可能性）: {e}"
-                    print(error_msg)
+                    logger.error(f"脳の処理中にエラーが発生しました（API制限の可能性）: {e}")
                     mouth.speak("ごめんなさい、ちょっと頭が痛いわ。少し休ませてちょうだい。")
                 
                 print("\n") # 最後に1回だけ綺麗に改行する
@@ -62,7 +70,11 @@ def main():
         
             #Ctrl+C が押されたら、無限ループを安全に破壊して終了する
         except KeyboardInterrupt:
-            print("\nシステムをシャットダウンします。おやすみなさい。")
+            logger.info("シャットダウン開始...")
+            # 【Graceful Shutdown】最後の挨拶をキューに投げ、全再生完了を待ってから終了
+            mouth.speak("おやすみなさい、助手。また明日ね。")
+            mouth.wait_until_done()
+            logger.info("全リソースの解放完了。システム終了。")
             sys.exit(0)
 
 # このファイルが直接実行された時だけ、main() を呼び出すおまじない
