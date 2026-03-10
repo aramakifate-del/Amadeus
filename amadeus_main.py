@@ -41,7 +41,7 @@ def main():
                 stream_buffer = ""
                 try:
                     #yieldだるすぎ！！ gen関数は関数定義でforで回した上で、呼び出しでもforで回さないと動かない！！
-                    for chunk in brain.ask_stream(user_input): #streamとyieldの非同期処理により、リアルタイム性を重視して思考を生成
+                    for chunk in brain.ask_stream(user_input): #streamとyieldにより、リアルタイム性を重視して思考を生成
                         print(chunk, end="", flush=True)  # ← 受け取った文字をここで画面に出力（改行なしで繋げる）
                         
                         # stream_bufferにchunkを追加（ただし、VOICEVOX用に改行文字は消してあげる）
