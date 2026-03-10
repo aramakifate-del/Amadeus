@@ -1,0 +1,20 @@
+# ===== Amadeus System: Dependencies =====
+
+# --- Brain (LLM / RAG) ---
+groq                    # Groq API client (Llama3 inference)
+chromadb                # Local Vector Database for RAG memory
+sentence-transformers   # Embedding model (all-MiniLM-L6-v2)
+pandas                  # Data cleansing pipeline for corpus
+
+# --- Ear (STT / VAD) ---
+faster-whisper          # Local speech-to-text (Whisper)
+torch                   # Silero VAD (Voice Activity Detection)
+numpy                   # Audio buffer processing (int16 -> float32)
+pyaudio                 # Microphone input stream
+keyboard                # Ctrl-key fallback for text input mode
+
+# --- Mouth (TTS / Playback) ---
+requests                # VOICEVOX local API communication
+
+# --- Common ---
+python-dotenv           # .env file loader for API keys
