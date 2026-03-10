@@ -51,7 +51,7 @@ class AmadeusBrain:  #実体（インスタンス）が生まれた瞬間に、�
 
         logger.info("チャットセット完了 (Groq/Llama3 + RAG Vector Database)")
 
-    #チャット機能実装 (同期処理returnだと、リアルタイム性がないので、非同期yieldを採用しTTFTを低減）
+    #チャット機能実装 (returnだと、リアルタイム性がないので、yieldを採用しTTFTを低減）
     def ask_stream(self, user_input):
         logger.info("📡 記憶領域(ChromaDB)から関連する記憶を検索中...")
         
