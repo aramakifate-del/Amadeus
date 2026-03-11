@@ -85,3 +85,5 @@ AmadeusSystem/
 - **Phase 11:** Discord Botによるヘッドレスアーキテクチャ化（async/await全面移行）
 - **Phase 12:** Live2D + Wallpaper Engineとの WebSocket リアルタイム同期（リップシンク）
 - **Phase 14:** マルチ階層記憶アーキテクチャ（Tier 0〜3: 静的注入 / Discordフェッチ / ベクトル検索 / 重大イベント全件注入）
+
+> **設計方針:** 現在のLLMエンジン（Groq / Llama 3.1）はプロトタイプ用として採用。AIペルソナの人格の一貫性と推論品質の向上のため、将来的にはより高精度なモデルへの換装を予定している。LLMの差し替えは`amadeus_core.py`内のAPIコール層のみで完結する疎結合設計を採用しており、Ear・Mouth・Mainモジュールへの影響はゼロである。
